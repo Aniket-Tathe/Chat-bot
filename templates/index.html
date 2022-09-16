@@ -1,41 +1,137 @@
 <!DOCTYPE html>
-<html >
-<!--From https://codepen.io/frytyler/pen/EGdtg-->
-<head>
-  <meta charset="UTF-8">
-  <title>Chatbot</title>
-  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Hind:300' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
-  
-</head>
+<html>
+	<!--From https://codepen.io/frytyler/pen/EGdtg-->
+	<head>
+		<meta charset="UTF-8" />
+		<title>Chatbot</title>
+		<link
+			href="https://fonts.googleapis.com/css?family=Pacifico"
+			rel="stylesheet"
+			type="text/css"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Arimo"
+			rel="stylesheet"
+			type="text/css"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Hind:300"
+			rel="stylesheet"
+			type="text/css"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300"
+			rel="stylesheet"
+			type="text/css"
+		/>
+	</head>
+	<style>
+		/* Global */
+		html {
+			min-height: 100%;
+			overflow: hidden;
+		}
+		body {
+			height: calc(100vh - 8em);
+			padding: 4em;
+			color: rgba(255, 255, 255, 0.75);
+			font-family: 'Anonymous Pro', monospace;
+			background-color: rgb(25, 25, 25);
+		}
+		.msg {
+			animation: fade-in 0.5s;
+		}
 
-<body>
-  <head>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  </head>
- <div class="login">
-	<h1>Chatbot</h1>
+		@keyframes fade-in {
+			0% {
+				opacity: 0;
+			}
+			100% {
+				opacity: 1;
+			}
+		}
 
-     <!-- Main Input For Receiving Query to our ML -->
-    <form action="{{ url_for('predict')}}"method="post">
-    	<input type="text" id="predictInput" name="experience" placeholder="User input" required="required" onchange="sendData()" />
+		#predictInput {
+			background-color: rgb(25, 25, 25);
+			color: whitesmoke;
+			outline: none;
+			border: none;
+			border-bottom: gray 2px solid;
+			padding: 1rem;
+			font-size: 1rem;
+		}
 
-        <button type="button" class="btn btn-primary btn-block btn-large">Predict</button>
-    </form>
+		.predict-btn {
+			padding: 1rem;
+			border-radius: 0.5rem;
+			background-color: rgba(255, 255, 255, 0.8);
+			border: none;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+		.predict-btn:hover {
+			background-color: rgba(255, 255, 255, 1);
+			box-shadow: 0px 0px 5px white;
+		}
+	</style>
 
-   <br>
-   <br>
-   {{ prediction_text }}
+	<body>
+		<head>
+			<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		</head>
+		<div class="login">
+			<h1>Chatbot</h1>
 
- </div>
+			<!-- Main Input For Receiving Query to our ML -->
+			<!-- action="{{ url_for('predict')}}" -->
+			<input
+				type="text"
+				id="predictInput"
+				name="experience"
+				placeholder="Enter a message"
+				required="required"
+			/>
 
- <script>
-  const sendData = async (data) => {
-    const response = await axios.post(`http://127.0.0.1:5000/predict`,{input : document.getElementById("predictInput").value});
-  }
- </script>
+			<button
+				type="button"
+				onclick="sendData()"
+				class="predict-btn btn btn-primary btn-block btn-large"
+			>
+				Predict
+			</button>
 
-</body>
+			<br />
+			<br />
+			<div id="messages"></div>
+		</div>
+
+		<script>
+			window.addEventListener('keypress', (e) => {
+				if (e.key === 'Enter') {
+					sendData();
+				}
+			});
+			const msgContainer = document.getElementById('messages');
+			const generateMsgComponent = (from, msg) => {
+				return `<p class="msg">${from} : ${msg}</p>`;
+			};
+
+			const sendData = async (data) => {
+				msgContainer.insertAdjacentHTML(
+					'beforeend',
+					generateMsgComponent(
+						'You',
+						document.getElementById('predictInput').value
+					)
+				);
+				const response = await axios.post(`http://127.0.0.1:5000/predict`, {
+					text: document.getElementById('predictInput').value,
+				});
+				msgContainer.insertAdjacentHTML(
+					'beforeend',
+					generateMsgComponent('ChatBot', response.data)
+				);
+			};
+		</script>
+	</body>
 </html>
